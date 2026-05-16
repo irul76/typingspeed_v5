@@ -1666,16 +1666,28 @@ function ctShowToast(msg) {
 // ================================================================
 // HOOK INTO NAVIGATION
 // ================================================================
+// BARU — aman
 (function hookNavigate() {
-  if (typeof navigate === 'function') {
-    const orig = navigate;
-    window.navigate = function(page) {
-      orig(page);
-      if (page === 'codetyper') setTimeout(() => ctInit(), 100);
-    };
-  }
+  // Patch PAGE_TITLES dulu
   if (typeof PAGE_TITLES !== 'undefined') {
     PAGE_TITLES['codetyper'] = 'Code Typer';
+  }
+
+  // Hook navigate dengan try-catch agar tidak crash
+  function patchNavigate() {
+    if (typeof navigate !== 'function') return;
+    const orig = navigate;
+    window.navigate = function(page) {
+      try { orig(page); } catch(e) { console.warn('navigate orig error:', e); }
+      if (page === 'codetyper') setTimeout(() => { try { ctInit(); } catch(e) {} }, 150);
+    };
+  }
+
+  // Tunggu sampai navigate siap
+  if (typeof navigate === 'function') {
+    patchNavigate();
+  } else {
+    window.addEventListener('load', patchNavigate);
   }
 })();
 
