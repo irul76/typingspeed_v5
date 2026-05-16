@@ -1928,8 +1928,10 @@ function speakVocab() {
 // ============================================================
 function filterVocabList() {
   const cat = vocabState.cat;
-  if(cat === 'all') vocabState.list = [...VOCAB_LIST];
-  else vocabState.list = VOCAB_LIST.filter(v => v.cat === cat);
+  // Guard: filter out any undefined/null items
+  const safeList = VOCAB_LIST.filter(v => v && v.word);
+  if(cat === 'all') vocabState.list = [...safeList];
+  else vocabState.list = safeList.filter(v => v.cat === cat);
   if(settings.srs) {
     // SRS: sort — words with lower mastery come first
     vocabState.list.sort((a,b) => {
